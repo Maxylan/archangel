@@ -5,7 +5,7 @@ import { Formatters, GuildMember } from 'discord.js';
 /**
  * Options used when registering the command.
  * 
- * For a full list of commands available here...
+ * A full list of options for ApplicationCommandRegistry available here...
  * @see https://www.sapphirejs.dev/docs/Guide/application-commands/application-command-registry/registering-chat-input-commands
  */
 export const BoopOptions: ApplicationCommandRegistry.RegisterOptions = {
@@ -30,7 +30,8 @@ export class BoopCommand extends Command {
 
         if ( interaction.isUserContextMenu() && interaction.targetMember instanceof GuildMember) {
             return interaction.reply({
-                content: `https://tenor.com/view/fox-animation-animated-fox-boop-boop-nose-gif-23550052\n${Formatters.userMention(interaction.targetMember.id)}`,
+                embeds: [{ image: { url: 'https://c.tenor.com/AOyF2C6ok0cAAAAd/fox-animation.gif' } }],
+                content: `\n${Formatters.userMention(interaction.targetMember.id)}`,
                 allowedMentions: {
                     users: [ interaction.targetMember.id , interaction.user.id ]
                 }

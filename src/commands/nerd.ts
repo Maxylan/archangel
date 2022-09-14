@@ -1,5 +1,6 @@
 import { ApplicationCommandRegistry, Command } from '@sapphire/framework';
 import { Formatters, Message } from 'discord.js';
+import { Core } from '../core';
 
 // This is not needed for a simple messageRun Message Command (I'm guessing.)
 // /**
@@ -31,34 +32,34 @@ export class NerdCommand extends Command {
 
     // Executed when the command aliases are typed in chat.
     public async messageRun(message: Message) {
-        const msg = await message.channel.send(`You too? Here's something that might tickle your fancy!\`\`\`json\n${JSON.stringify({
-            author: '@Maxylan#8711',
-            botName: 'Archangel',
-            botVersion: '',
-            createdAt: '2022-09-13',
-            lastUpdatedAt: '',
-            language: 'TypeScript (TS)',
-            architecture: 'NodeJS 16.17.0',
-            hostName: 'archangel.dev',
-            environment: 'Ubuntu64x~22.04.3',
+        const msg = await message.channel.send(`You too? Here's something that might tickle your fancy!\`\`\`json\n${JSON.stringify( {
+            author: Core.Data.Store.author,
+            botName: Core.Data.Store.botName,
+            botVersion: Core.Data.Store.botVersion,
+            createdAt: Core.Data.Store.createdAt,
+            lastUpdatedAt: Core.Data.Store.lastUpdatedAt,
+            language: Core.Data.Store.language,
+            architecture: Core.Data.Store.architecture,
+            hostName: Core.Data.Store.hostName,
+            environment: Core.Data.Store.environment,
             botLatency: Math.round(this.container.client.ws.ping) + 'ms',
             apiLatency: '--- ms',
-            repo: 'https://github.com/Maxylan/archangel'
+            repo: Core.Data.Store.repo
         }, undefined, 4)}\`\`\``);
 
-        return msg.edit(`You too? Here's something that might tickle your fancy!\`\`\`json\n${JSON.stringify({
-            author: '@Maxylan#8711',
-            botName: 'Archangel',
-            botVersion: '',
-            createdAt: '2022-09-13',
-            lastUpdatedAt: '',
-            language: 'TypeScript (TS)',
-            architecture: 'NodeJS 16.17.0',
-            hostName: 'archangel.dev',
-            environment: 'Ubuntu64x~22.04.3',
+        return msg.edit(`You too? Here's something that might tickle your fancy!\`\`\`json\n${JSON.stringify( {
+            author: Core.Data.Store.author,
+            botName: Core.Data.Store.botName,
+            botVersion: Core.Data.Store.botVersion,
+            createdAt: Core.Data.Store.createdAt,
+            lastUpdatedAt: Core.Data.Store.lastUpdatedAt,
+            language: Core.Data.Store.language,
+            architecture: Core.Data.Store.architecture,
+            hostName: Core.Data.Store.hostName,
+            environment: Core.Data.Store.environment,
             botLatency: Math.round(this.container.client.ws.ping) + 'ms',
             apiLatency: msg.createdTimestamp - message.createdTimestamp + 'ms',
-            repo: 'https://github.com/Maxylan/archangel'
+            repo: Core.Data.Store.repo
         }, undefined, 4)}\`\`\``);
 
     }
