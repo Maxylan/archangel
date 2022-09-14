@@ -55,7 +55,6 @@ export class Core {
 				return 500;
 			}
 		);
-		console.log('It gets here.');
 		
 		return status;
 	}
@@ -77,7 +76,9 @@ export class Core {
 		Core.Configuration = {
 			intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS'],
 			baseUserDirectory: __dirname,
-			loadMessageCommandListeners: true
+			loadMessageCommandListeners: true,
+			caseInsensitiveCommands: true,
+			typing: true
 		};
 
 	}
