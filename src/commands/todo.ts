@@ -1,5 +1,6 @@
 import { ApplicationCommandRegistry, Command } from '@sapphire/framework';
 import { Formatters, Message, MessageEmbed } from 'discord.js';
+import { permission } from '../includes/permissions';
 
 // This is not needed for a simple messageRun Message Command (I'm guessing.)
 // /**
@@ -20,6 +21,12 @@ import { Formatters, Message, MessageEmbed } from 'discord.js';
  */
 export class TodoCommand extends Command {
 
+    /**
+     * Permission Level required to run this command.
+     * @since       1.0.0b
+     */
+    public static readonly RequiredPermission: number = 25;
+
     public constructor(context: Command.Context, options: Command.Options) {
         super(context, {
             ...options,
@@ -32,9 +39,8 @@ export class TodoCommand extends Command {
     // Executed when the command aliases are typed in chat.
     public async messageRun(message: Message) {
 
-        if (message.author.id !== '554344266932027412') {
-            return await message.channel.send({embeds: [{ image: { url: 'https://c.tenor.com/O4eWfm9KXjgAAAAC/threddy-threddyrex.gif' } }]})
-        }
+        // Obligatory permissions check.
+        if ( ! permission.check( parseInt( message.author.id ), TodoCommand.RequiredPermission ) ) return permission.denied( message.channel );
 
         return await message.channel.send( { embeds: [
             new MessageEmbed()

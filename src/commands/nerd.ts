@@ -1,6 +1,7 @@
 import { ApplicationCommandRegistry, Command } from '@sapphire/framework';
 import { Formatters, Message } from 'discord.js';
 import { Core } from '../core';
+import { permission } from '../includes/permissions';
 
 // This is not needed for a simple messageRun Message Command (I'm guessing.)
 // /**
@@ -21,6 +22,12 @@ import { Core } from '../core';
  */
 export class NerdCommand extends Command {
 
+    /**
+     * Permission Level required to run this command.
+     * @since       1.0.0b
+     */
+    public static readonly RequiredPermission: number = 25;
+
     public constructor(context: Command.Context, options: Command.Options) {
         super(context, {
             ...options,
@@ -32,6 +39,10 @@ export class NerdCommand extends Command {
 
     // Executed when the command aliases are typed in chat.
     public async messageRun(message: Message) {
+        
+        // Obligatory permissions check.
+        if ( ! permission.check( parseInt( message.author.id ), NerdCommand.RequiredPermission ) ) return permission.denied( message.channel );
+
         const msg = await message.channel.send(`You too? Here's something that might tickle your fancy!\`\`\`json\n${JSON.stringify( {
             author: Core.Data.Store.author,
             botName: Core.Data.Store.botName,

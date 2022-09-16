@@ -1,6 +1,7 @@
 import { ApplicationCommandRegistry, Command, RegisterBehavior } from '@sapphire/framework';
 import { ApplicationCommandType } from 'discord-api-types/v9';
-import { Formatters, GuildMember } from 'discord.js';
+import { Formatters, GuildMember, TextBasedChannel } from 'discord.js';
+import { permission } from '../includes/permissions';
 
 /**
  * Options used when registering the command.
@@ -21,12 +22,21 @@ export const BoopOptions: ApplicationCommandRegistry.RegisterOptions = {
  */
 export class BoopCommand extends Command {
 
+    /**
+     * Permission Level required to run this command.
+     * @since       1.0.0b
+     */
+    public static readonly RequiredPermission: number = 25;
+
     public constructor(context: Command.Context, options: Command.Options) {
         super(context, { ...options });
     }
 
     // Executes the command when it's called in the context-menu.
     public async contextMenuRun(interaction: Command.ContextMenuInteraction) {
+        
+        // Obligatory permissions check.
+        if ( ! permission.check( parseInt( interaction.user.id ), BoopCommand.RequiredPermission ) ) return await permission.denied( await <TextBasedChannel>interaction.channel );
 
         if ( interaction.isUserContextMenu() && interaction.targetMember instanceof GuildMember) {
             return interaction.reply({

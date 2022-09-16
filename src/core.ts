@@ -2,6 +2,7 @@ import { SapphireClient } from '@sapphire/framework';
 import type { ClientOptions } from 'discord.js';
 import type { PrivateConfiguration } from './config';
 import { helper } from './includes/helpers';
+import { db } from './includes/db';
 
 interface DataStore {
 	State: any,
@@ -44,7 +45,7 @@ export class Core {
 	 * @since	1.0.0b
 	 * @return	number	Core.Data.State.launchStatus
 	 */
-	public run( config: PrivateConfiguration ): number {
+	public async run( config: PrivateConfiguration ): Promise<number> {
 
 		Core.Client = new SapphireClient( Core.Configuration );
 
@@ -67,7 +68,7 @@ export class Core {
 
 		);
 		
-		return this.testDBConnection( config );
+		return await this.testDBConnection( config );
 
 	}
 
@@ -77,14 +78,17 @@ export class Core {
 	 * @since	1.0.0b
 	 * @return	number	Core.Data.State.launchStatus
 	 */
-	private testDBConnection( config: PrivateConfiguration ): number {
+	private async testDBConnection( config: PrivateConfiguration ): Promise<number> {
 
-		// Environment variables available in PrivateConfig.
-		// ARCHANGEL_TOKEN
-		// ARCHANGEL_DB="ArchDB"
-		// ARCHANGEL_DB_ADRESS
-		// ARCHANGEL_DBUSER
-		// ARCHANGEL_DBUSER_ADRESS
+		await db.connect()?.query('SELECT * FROM arch_users', function (e, r) {
+			if (e) {
+				console.log(e);
+				Core.Data.State.launchStatus = 400;
+				return Core.Data.State.launchStatus;
+			}
+			console.log(`[INFO] DB-Test Successfull: Found ${r.length} users in arch_user.`);
+			Core.Data.Store.users = r;
+		}); db.disconnect();
 		
 		return Core.Data.State.launchStatus;
 
