@@ -68,11 +68,8 @@ export const permission = {
                         console.log(err);
                         return isAuthorized;
                     }
-                    else if (rTwo.length === 0) {
-                        return isAuthorized;
-                    }
     
-                    if (rTwo.level > permissionLevel) permissionLevel = rTwo.level;
+                    if (rTwo[0].level > permissionLevel) permissionLevel = rTwo[0].level;
     
                 });
             });
@@ -80,10 +77,11 @@ export const permission = {
 		}); db.disconnect();
 
         if ( permission && permissionLevel >= requiredPermission ) {
+            isAuthorized = true;
             return true; // Authorized.
         }
 
-        console.log(`[INFO] User ${user} attempted to execute a command with insufficient permissions.`);
+        if (!isAuthorized) console.log(`[INFO] User ${user} attempted to execute a command with insufficient permissions.`);
         return isAuthorized;
     },
 

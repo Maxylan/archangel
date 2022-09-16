@@ -39,11 +39,13 @@ export class BoopCommand extends Command {
         if ( ! permission.check( parseInt( interaction.user.id ), BoopCommand.RequiredPermission ) ) return await permission.denied( await <TextBasedChannel>interaction.channel );
 
         if ( interaction.isUserContextMenu() && interaction.targetMember instanceof GuildMember) {
+            let user_ids: Array<any> = [ interaction.targetMember.id ];
+            if ( interaction.targetMember.id !== interaction.user.id) user_ids.push(interaction.user.id);
             return interaction.reply({
                 embeds: [{ image: { url: 'https://c.tenor.com/AOyF2C6ok0cAAAAd/fox-animation.gif' } }],
                 content: `\n${Formatters.userMention(interaction.targetMember.id)}`,
                 allowedMentions: {
-                    users: [ interaction.targetMember.id , interaction.user.id ]
+                    users: user_ids
                 }
             });
         }
