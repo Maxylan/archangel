@@ -11,6 +11,11 @@ import { db } from './db';
  */
 export const permission = {
 
+    /**
+     * The standard response to return when a user is denied access to a command.
+     * @since   1.0.0b
+     * @type    object
+     */
     stdResponseDenied: { image: { url: 'https://c.tenor.com/O4eWfm9KXjgAAAAC/threddy-threddyrex.gif' } },
     
     /**
@@ -23,7 +28,7 @@ export const permission = {
     check: async (uid: number, requiredPermission: number): Promise<boolean> => {
 
         let user = 0;
-        uid = 451804930827747328;
+        
         // First, look through Core.Data.Store.users if the user is stored in memory.
         if (typeof Core.Data.Store.users !== 'undefined') {
             Core.Data.Store.users.forEach(function (u: any) {
