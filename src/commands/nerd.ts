@@ -41,7 +41,8 @@ export class NerdCommand extends Command {
     public async messageRun(message: Message) {
         
         // Obligatory permissions check.
-        if ( ! permission.check( parseInt( message.author.id ), NerdCommand.RequiredPermission ) ) return permission.denied( message.channel );
+        if ( ! await permission.check( parseInt( message.author.id ), NerdCommand.RequiredPermission ) ) 
+            return await permission.denied( message.channel, message.author.id );
 
         const msg = await message.channel.send(`You too? Here's something that might tickle your fancy!\`\`\`json\n${JSON.stringify( {
             author: Core.Data.Store.author,

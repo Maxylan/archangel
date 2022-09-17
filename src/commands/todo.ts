@@ -39,8 +39,10 @@ export class TodoCommand extends Command {
     // Executed when the command aliases are typed in chat.
     public async messageRun(message: Message) {
 
-        // Obligatory permissions check.
-        if ( ! permission.check( parseInt( message.author.id ), TodoCommand.RequiredPermission ) ) return permission.denied( message.channel );
+        // Obligatory permissions check. Error somewhere in this file, guessing it's to do with this. Maybe make permissions.check() a promise?
+        if ( ! await permission.check( parseInt( message.author.id ), TodoCommand.RequiredPermission ) ) {
+            return await permission.denied( message.channel, message.author.id );
+        }
 
         return await message.channel.send( { embeds: [
             new MessageEmbed()
@@ -51,12 +53,13 @@ export class TodoCommand extends Command {
                 .addFields(
                     { name: 'Read-up on @Sapphire', value: 'https://www.sapphirejs.dev/docs/Guide/getting-started/getting-started-with-sapphire\n https://www.sapphirejs.dev/docs/General/Welcome' },
                     { name: 'Learn', value: 'This could go on forever!', inline: true },
-                    { name: 'Last viewed in TODO', value: 'Fix "Last Viewed" in the footer of this command.', inline: true },
-                    { name: 'Global Variable Store', value: 'Impliment global stored values in application so commands and other parts have easy-access to certain values.', inline: true },
+                    { name: 'Modals', value: 'When a Password is required for the higher-level functions, a modal should appear that allows the user to type it in securely.', inline: true },
                     { name: '\u200B', value: '\u200B' },
 
-                    { name: 'Database Implimentation', value: 'LOTS OF THINGS TO DO HERE. When implimented it will enable tons more complexity in application functionality.' },
-                    { name: 'Permissions', value: 'Generate a handler and permissions-denied-callback for permissions.', inline: true },
+                    { name: 'Database Implimentation', value: 'LOTS OF THINGS TO DO HERE. Main task is to figure out what!' },
+                    { name: 'Permissions', value: 'Should add users to the Database when it can\'t find them in it. (Oh and pswd modals like previously mentioned.)', inline: true },
+                    { name: 'Temporary Messages', value: 'Allow for the automatic removal of some messages after some time.', inline: true },
+                    { name: 'Refactor into Promises', value: 'I\'m so dumb for not making the database calls promises. Now I have to refactor. Glad I caught it early in development.' },
                     { name: '\u200B', value: '\u200B' },
                 )
                 .setFooter({ text: `Last Updated '---' | Last Viewed ${Date.toLocaleString()}` })

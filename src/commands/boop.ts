@@ -36,7 +36,8 @@ export class BoopCommand extends Command {
     public async contextMenuRun(interaction: Command.ContextMenuInteraction) {
         
         // Obligatory permissions check.
-        if ( ! permission.check( parseInt( interaction.user.id ), BoopCommand.RequiredPermission ) ) return await permission.denied( await <TextBasedChannel>interaction.channel );
+        if ( ! await permission.check( parseInt( interaction.user.id ), BoopCommand.RequiredPermission ) ) 
+            return await permission.ctxMenuDenied( interaction, interaction.user.id );
 
         if ( interaction.isUserContextMenu() && interaction.targetMember instanceof GuildMember) {
             let user_ids: Array<any> = [ interaction.targetMember.id ];

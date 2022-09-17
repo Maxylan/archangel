@@ -80,15 +80,15 @@ export class Core {
 	 */
 	private async testDBConnection( config: PrivateConfiguration ): Promise<number> {
 
-		await db.connect()?.query('SELECT * FROM arch_users', function (e, r) {
-			if (e) {
-				console.log(e);
-				Core.Data.State.launchStatus = 400;
-				return Core.Data.State.launchStatus;
-			}
-			console.log(`[INFO] DB-Test Successfull: Found ${r.length} users in arch_user.`);
-			Core.Data.Store.users = r;
-		}); db.disconnect();
+		// await db.connect()?.query('SELECT * FROM arch_users', function (e, r) {
+		// 	if (e) {
+		// 		console.log(e);
+		// 		Core.Data.State.launchStatus = 400;
+		// 		return Core.Data.State.launchStatus;
+		// 	}
+		// 	console.log(`[INFO] DB-Test Successfull: Found ${r.length} users in arch_user.`);
+		// 	Core.Data.Store.users = r;
+		// }); db.disconnect();
 		
 		return Core.Data.State.launchStatus;
 
