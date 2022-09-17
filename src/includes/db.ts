@@ -79,6 +79,10 @@ export const db = {
 
         });
 
+    },
+
+    now: (): string => {
+        return '';
     }
 
 }

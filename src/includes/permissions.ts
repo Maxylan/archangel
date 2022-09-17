@@ -1,8 +1,9 @@
 import { LogLevel } from '@sapphire/framework';
-import { Formatters, AnyChannel, Channel, DMChannel, NewsChannel, PartialDMChannel, StageChannel, StoreChannel, TextChannel, Message, ContextMenuInteraction, CacheType } from 'discord.js';
+import { Formatters, AnyChannel, Channel, DMChannel, NewsChannel, PartialDMChannel, StageChannel, StoreChannel, TextChannel, Message, ContextMenuInteraction, CacheType, UserResolvable, Snowflake, Guild } from 'discord.js';
 import { config } from '../config';
 import { Core } from '../core';
 import { db } from './db';
+import { helper } from './helpers';
 
 /**
  * Contains several helper-functions for authorizing users through Archangel's permissions system
@@ -25,10 +26,12 @@ export const permission = {
      * @since   1.0.0b
      * @return  boolean
      */
-    check: async (uid: number, requiredPermission: number): Promise<boolean> => {
+    check: async (uid: string, requiredPermission: number, guild: Guild): Promise<boolean> => {
 
         let user = 0;
-        
+        // let suid = 451804930827747300 + '';
+        // uid = 451804930827747300;
+
         // First, look through Core.Data.Store.users if the user is stored in memory.
         if (typeof Core.Data.Store.users !== 'undefined') {
             Core.Data.Store.users.forEach(function (u: any) {
@@ -41,7 +44,7 @@ export const permission = {
         // If the user is not stored in Core.Data.Store.users. Query for it...
         if ( ! user ) {
             user = await db.query({
-                statement: "SELECT * FROM arch_users WHERE id = '?' OR uid = '?'",
+                statement: "SELECT * FROM arch_users WHERE id = ? OR uid = ?",
                 arguments: [uid, uid]
             }, 
             (value: any) => {
@@ -63,8 +66,29 @@ export const permission = {
 
         // Could not determine user.
         if ( ! user ) {
-            console.log(`[WARN] Could not reliably determine identity of user ${uid}.`);
-            return false;
+            console.log(`[INFO] Could not reliably determine identity of user ${uid}. Adding it to the DB...`);
+
+            // I'm still learning promises. I wonder if that shows? xD
+            await guild.members.fetch( <Snowflake> uid ).then( 
+                (result) => {
+                    helper.addUser( result ).then( 
+                        (value) => {
+                            console.log('finished.');
+                            console.log(value);
+                            user = value;
+                        }, 
+                        (reason) => {
+                            console.log(`[ERROR] Encountered an error attempting to add user ${user} to the database.`);
+                            console.log(reason);
+                        }
+                    ); 
+                }, (reason) => {
+                    console.log(`[ERROR] Fetching user ${uid} failed. ` + reason); 
+                    return false;
+                }
+            );
+
+            if ( ! user ) { console.log(`[INFO] Adding user ${uid} to database failed.`); return false; }
         }
 
         

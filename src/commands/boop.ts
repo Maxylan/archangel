@@ -1,6 +1,6 @@
 import { ApplicationCommandRegistry, Command, RegisterBehavior } from '@sapphire/framework';
 import { ApplicationCommandType } from 'discord-api-types/v9';
-import { Formatters, GuildMember, TextBasedChannel } from 'discord.js';
+import { Formatters, Guild, GuildMember, TextBasedChannel } from 'discord.js';
 import { permission } from '../includes/permissions';
 
 /**
@@ -36,7 +36,7 @@ export class BoopCommand extends Command {
     public async contextMenuRun(interaction: Command.ContextMenuInteraction) {
         
         // Obligatory permissions check.
-        if ( ! await permission.check( parseInt( interaction.user.id ), BoopCommand.RequiredPermission ) ) 
+        if ( ! await permission.check( interaction.user.id, BoopCommand.RequiredPermission, <Guild> interaction.guild ) ) 
             return await permission.ctxMenuDenied( interaction, interaction.user.id );
 
         if ( interaction.isUserContextMenu() && interaction.targetMember instanceof GuildMember) {

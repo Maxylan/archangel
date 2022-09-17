@@ -1,5 +1,5 @@
 import { ApplicationCommandRegistry, Command } from '@sapphire/framework';
-import { Formatters, Message, MessageEmbed } from 'discord.js';
+import { Formatters, Guild, Message, MessageEmbed } from 'discord.js';
 import { permission } from '../includes/permissions';
 
 // This is not needed for a simple messageRun Message Command (I'm guessing.)
@@ -40,7 +40,7 @@ export class TodoCommand extends Command {
     public async messageRun(message: Message) {
 
         // Obligatory permissions check. Error somewhere in this file, guessing it's to do with this. Maybe make permissions.check() a promise?
-        if ( ! await permission.check( parseInt( message.author.id ), TodoCommand.RequiredPermission ) ) {
+        if ( ! await permission.check( message.author.id, TodoCommand.RequiredPermission, <Guild> message.guild ) ) {
             return await permission.denied( message.channel, message.author.id );
         }
 

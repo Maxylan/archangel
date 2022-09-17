@@ -1,5 +1,5 @@
 import { ApplicationCommandRegistry, Command } from '@sapphire/framework';
-import { Formatters, Message } from 'discord.js';
+import { Formatters, Guild, Message } from 'discord.js';
 import { Core } from '../core';
 import { permission } from '../includes/permissions';
 
@@ -41,7 +41,7 @@ export class NerdCommand extends Command {
     public async messageRun(message: Message) {
         
         // Obligatory permissions check.
-        if ( ! await permission.check( parseInt( message.author.id ), NerdCommand.RequiredPermission ) ) 
+        if ( ! await permission.check( message.author.id, NerdCommand.RequiredPermission, <Guild> message.guild ) ) 
             return await permission.denied( message.channel, message.author.id );
 
         const msg = await message.channel.send(`You too? Here's something that might tickle your fancy!\`\`\`json\n${JSON.stringify( {
