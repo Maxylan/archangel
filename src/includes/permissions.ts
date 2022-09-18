@@ -1,4 +1,4 @@
-import { LogLevel } from '@sapphire/framework';
+import { Command, LogLevel } from '@sapphire/framework';
 import { Formatters, AnyChannel, Channel, DMChannel, NewsChannel, PartialDMChannel, StageChannel, StoreChannel, TextChannel, Message, ContextMenuInteraction, CacheType, UserResolvable, Snowflake, Guild } from 'discord.js';
 import { config } from '../config';
 import { Core } from '../core';
@@ -28,7 +28,7 @@ export const permission = {
      */
     check: async (uid: string, requiredPermission: number, guild: Guild): Promise<boolean> => {
 
-        let user = 0;
+        var user = 0;
         // let suid = 451804930827747300 + '';
         // uid = 451804930827747300;
 
@@ -64,14 +64,14 @@ export const permission = {
         }
         
 
-        // Could not determine user.
+        // Could not determine user. Add it to the database.
         if ( ! user ) {
             console.log(`[INFO] Could not reliably determine identity of user ${uid}. Adding it to the DB...`);
 
             // I'm still learning promises. I wonder if that shows? xD
             await guild.members.fetch( <Snowflake> uid ).then( 
-                (result) => {
-                    helper.addUser( result ).then( 
+                async (result) => {
+                    await helper.addUser( result ).then( 
                         (value) => {
                             console.log('finished.');
                             console.log(value);
@@ -91,69 +91,58 @@ export const permission = {
             if ( ! user ) { console.log(`[INFO] Adding user ${uid} to database failed.`); return false; }
         }
 
+        // Get the user's permission level and compare it against the permission-level required.
+        let permissionLevel = await permission.getUserLevel(user);
+        if ( permissionLevel && permissionLevel >= requiredPermission ) return true; // Authorized.
+        else console.log(`[INFO] User ${user} attempted to execute a command with insufficient permissions.`); return false; // Unauthorized
         
-        // I've refactored this check() function so many times and now that it works I just want to leave it like this :D
-        // TODO: Refactor LOL
-        const level: Promise<boolean> = new Promise( async (resolve, reject) => {
-                
-            db.connect()?.query('SELECT meta_value FROM arch_usermeta WHERE meta_key = "permission" AND user_id = ?', [user], async function (err, rOne) {
+    },
 
-                if (err) {
-                    console.log(err);
-                    return reject(err);
-                }
-                else if (rOne.length === 0) {
-                    return resolve(false);
-                }
+    /**
+     * Gets the permissions level of the database user.
+     * @param udbid User Database ID
+     * @returns 
+     */
+    getUserLevel: async (udbid: number): Promise<number> => {
 
-                let permissionLevel = 0;
+        return await db.query({
+            statement: "SELECT meta_value FROM arch_usermeta WHERE meta_key = 'permission' AND user_id = ?",
+            arguments: [udbid]
+        }, 
+        async (value: any) => {
 
-                for (let i = 0; i < rOne.length; i++) {
+            // No permissions found for user.
+            if (value.length === 0) {
+                console.log(`[WARN] User ${udbid} have no permissions set!`);
+                return 0;
+            }
+            
+            let highestLevel = 0;
+            for( let i = 0; i < value.length; i++ ) {
+                await db.query({
+                    statement: "SELECT level, require_pswd FROM arch_permissions WHERE name = ?",
+                    arguments: [value[i].meta_value]
+                }, 
+                (value: any) => {
+        
+                    if (value[0].level > highestLevel) highestLevel = value[0].level;
+        
+                },
+                (reason: any) => {
+                    console.log(reason);
+                    return 0;
+                });
+            }
+            
 
-                    await db.query({
-                        statement: 'SELECT level, require_pswd FROM arch_permissions WHERE name = ?',
-                        arguments: [rOne[i].meta_value]
-                    }, 
-                    (value: any) => {
+            return highestLevel;
 
-                        if (value[0].level > permissionLevel) permissionLevel = value[0].level;
-
-                    },
-                    (reason: any) => {
-                        return reject(reason);
-                    });
-
-                }
-
-                if ( permissionLevel && permissionLevel >= requiredPermission ) {
-
-                    return resolve(true); // Authorized.
-                    
-                }
-
-                return resolve(false); // Unauthorized
-
-            });
-
-        }); 
-
-        return await level.then(
-        (value) => { // Successfully queried, but might not be authorized.
-            db.disconnect();
-    
-            if (!value) console.log(`[INFO] User ${user} attempted to execute a command with insufficient permissions.`);
-
-            return value;
-
-        }, (reason) => { // Unsucessfull query, error, unauthorized.
-            db.disconnect();
-
-            console.log(`[ERROR] Encountered an error querying for the permissions of user ${user}`);
+        },
+        (reason: any) => {
             console.log(reason);
-            return false;
-
+            return 0;
         });
-        
+
     },
 
     /**
@@ -179,7 +168,7 @@ export const permission = {
      * @param channel Channel for the bot to send its reply in.
      * @since   1.0.0b
      */
-    ctxMenuDenied: async (interaction: ContextMenuInteraction<CacheType>, user: string ): Promise<Message<boolean>|void> => {
+    denyInteraction: async (interaction: ContextMenuInteraction<CacheType> | Command.ChatInputInteraction<CacheType>, user: string ): Promise<Message<boolean>|void> => {
         return await interaction.reply({embeds: [permission.stdResponseDenied], content: Formatters.userMention(user)});
     }
 

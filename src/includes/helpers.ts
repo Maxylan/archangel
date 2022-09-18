@@ -46,7 +46,7 @@ export const helper = {
                 // by other developers.
                 // TODO: Have a table in the database where these are defined instead? 
                 // Then I could make a command to CRUD these pre-defined roles.
-                predefinedGamerRoles = [
+                predefinedGamerRoles: Array<Array<string>> = [
 
                 ],
                 predefinedVibesquadRoles = [
@@ -87,13 +87,11 @@ export const helper = {
             }, 
                 (value: any) => {
 
-                    console.log(value);
-
                     // Could not find newly added user? Teapot?
                     if (typeof value.insertId === 'undefined') return reject('Could not find newly added user in the database.');
 
                     console.log(`[INFO] User ${user.id} Added to the database. DBID: ${value.insertId}`);
-                    return resolve(value.insertId);
+                    return value.insertId;
 
                 },
                 (reason: any) => {
@@ -101,23 +99,55 @@ export const helper = {
                 }
             );
 
+            if (roles.length > 1) {
 
-            // Assign the user a role. WIP
-            // await db.query({
-            //     statement: "INSERT INTO arch_usermeta VALUES (null, ?, 'permission', ?, db.now(), db.now())",
-            //     arguments: [
-            //         userDBID,
-            //         roleToGive
-            //     ]
-            // }, 
-            //     (value: any) => {
-            //
-            //
-            //     },
-            //     (reason: any) => {
-            //         return reject(reason);
-            //     }
-            // );
+                // Check predefinedGamerRoles && predefinedVibesquadRoles for indecies matching anything in 'roles'.
+                for (let i = 0; i < roles.length; i++) {
+
+                    if ( typeof predefinedGamerRoles[i] !== 'undefined' ) {
+
+                        if ( predefinedGamerRoles[i][0] == roles[i][0] || predefinedGamerRoles[i][0] == roles[i][1] ||
+                             (typeof predefinedGamerRoles[i][1] !== undefined && predefinedGamerRoles[i][1] == roles[i][0]) || 
+                             (typeof predefinedGamerRoles[i][1] !== undefined && predefinedGamerRoles[i][1] == roles[i][1]) ) {
+
+                                if (roleToGive != 'vibesquad') roleToGive = 'gamer';
+                        }
+
+                    }
+
+                    if ( typeof predefinedVibesquadRoles[i] !== 'undefined' ) {
+
+                        if ( predefinedVibesquadRoles[i][0] == roles[i][0] || predefinedVibesquadRoles[i][0] == roles[i][1] ||
+                             (typeof predefinedVibesquadRoles[i][1] !== undefined && predefinedVibesquadRoles[i][1] == roles[i][0]) || 
+                             (typeof predefinedVibesquadRoles[i][1] !== undefined && predefinedVibesquadRoles[i][1] == roles[i][1]) ) {
+
+                                roleToGive = 'vibesquad';
+                        }
+
+                    }
+
+                }
+        
+                // Assign the user its role.
+                return await db.query({
+                    statement: "INSERT INTO arch_usermeta VALUES (null, ?, 'permission', ?, '"+db.date()+"', '"+db.now()+"')",
+                    arguments: [
+                        userDBID,
+                        roleToGive
+                    ]
+                }, 
+                    (value: any) => {
+                        console.log(`[INFO] User successfully assigned role ${roleToGive}`);
+                        return resolve(userDBID);
+                    },
+                    (reason: any) => {
+                        return reject(reason);
+                    }
+                );
+
+            }
+
+            return resolve(userDBID);
             
 
         });

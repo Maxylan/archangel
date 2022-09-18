@@ -3,6 +3,7 @@ import type { ClientOptions } from 'discord.js';
 import type { PrivateConfiguration } from './config';
 import { helper } from './includes/helpers';
 import { db } from './includes/db';
+import { permission } from './includes/permissions';
 
 interface DataStore {
 	State: any,
@@ -80,15 +81,18 @@ export class Core {
 	 */
 	private async testDBConnection( config: PrivateConfiguration ): Promise<number> {
 
-		// await db.connect()?.query('SELECT * FROM arch_users', function (e, r) {
-		// 	if (e) {
-		// 		console.log(e);
-		// 		Core.Data.State.launchStatus = 400;
-		// 		return Core.Data.State.launchStatus;
-		// 	}
-		// 	console.log(`[INFO] DB-Test Successfull: Found ${r.length} users in arch_user.`);
-		// 	Core.Data.Store.users = r;
-		// }); db.disconnect();
+		await db.query({
+			statement: "SELECT * FROM arch_users",
+		},
+		(value: any) => {
+			console.log('[INFO] Database check successfull. Stored users in memory.');
+			Core.Data.Store.users = value;
+		},
+		(reason: any) => {
+			// Database-test failed.
+			console.log('[ERROR] Database-connection test in Archangel Core failed. 401: ' + reason);
+			Core.Data.State.launchStatus = 401;
+		});
 		
 		return Core.Data.State.launchStatus;
 

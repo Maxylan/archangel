@@ -37,7 +37,7 @@ export class BoopCommand extends Command {
         
         // Obligatory permissions check.
         if ( ! await permission.check( interaction.user.id, BoopCommand.RequiredPermission, <Guild> interaction.guild ) ) 
-            return await permission.ctxMenuDenied( interaction, interaction.user.id );
+            return await permission.denyInteraction( interaction, interaction.user.id );
 
         if ( interaction.isUserContextMenu() && interaction.targetMember instanceof GuildMember) {
             let user_ids: Array<any> = [ interaction.targetMember.id ];
